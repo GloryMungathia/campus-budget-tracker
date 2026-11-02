@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Loader2, AlertCircle, X } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/store/AuthContext';
 import { StoreProvider, useStore } from '@/store/StoreContext';
@@ -42,6 +42,7 @@ function MainApp() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState('expense');
+  const [editing, setEditing] = useState(null);
 
   function navigate(v) {
     setView(v);
@@ -49,7 +50,15 @@ function MainApp() {
   }
 
   function openAdd(defaultType = 'expense') {
+    setEditing(null);
     setModalType(defaultType);
+    setModalOpen(true);
+  }
+
+  const closeModal = useCallback(() => setModalOpen(false), []);
+
+  function openEdit(transaction) {
+    setEditing(transaction);
     setModalOpen(true);
   }
 
@@ -67,10 +76,10 @@ function MainApp() {
               <FullPageLoader text="Loading your budget…" />
             ) : (
               <>
-                {view === 'dashboard' && <Dashboard onNavigate={navigate} onAddClick={openAdd} />}
+                {view === 'dashboard' && <Dashboard onNavigate={navigate} onAddClick={openAdd} onEdit={openEdit} />}
                 {view === 'budgets' && <Budgets />}
                 {view === 'insights' && <Insights />}
-                {view === 'history' && <History />}
+                {view === 'history' && <History onEdit={openEdit} />}
                 {view === 'account' && <Account />}
               </>
             )}
@@ -78,7 +87,7 @@ function MainApp() {
         </main>
       </div>
 
-      <AddTransactionModal open={modalOpen} onClose={() => setModalOpen(false)} defaultType={modalType} />
+      <AddTransactionModal open={modalOpen} onClose={closeModal} defaultType={modalType} editing={editing} />
     </div>
   );
 }

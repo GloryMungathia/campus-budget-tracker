@@ -5,8 +5,9 @@ import { useStore } from '@/store/StoreContext';
 import { todayISO } from '@/lib/format';
 import { CategoryIcon } from './CategoryIcon';
 
-export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) {
-  const { addTransaction } = useStore();
+export function AddTransactionModal({ open, onClose, defaultType = 'expense', editing = null }) {
+  const { addTransaction, updateTransaction } = useStore();
+  const isEdit = Boolean(editing);
   const [type, setType] = useState(defaultType);
   const [categoryId, setCategoryId] = useState('');
   const [amount, setAmount] = useState('');
@@ -20,16 +21,16 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
 
   useEffect(() => {
     if (open) {
-      setType(defaultType);
-      setCategoryId('');
-      setAmount('');
-      setDate(todayISO());
-      setNote('');
+      setType(editing ? editing.type : defaultType);
+      setCategoryId(editing ? editing.categoryId : '');
+      setAmount(editing ? String(editing.amount) : '');
+      setDate(editing ? editing.date : todayISO());
+      setNote(editing?.note ?? '');
       setSaved(false);
       setSaving(false);
       setError('');
     }
-  }, [open, defaultType]);
+  }, [open, defaultType, editing]);
 
   useEffect(() => {
     if (!saved) return;
@@ -54,7 +55,9 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
     setSaving(true);
     setError('');
     try {
-      await addTransaction({ type, categoryId, amount: parsedAmount, date, note: note.trim() });
+      const data = { type, categoryId, amount: parsedAmount, date, note: note.trim() };
+      if (isEdit) await updateTransaction(editing.id, data);
+      else await addTransaction(data);
       setSaved(true);
     } catch (err) {
       setError(err.message);
@@ -72,12 +75,12 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
               <Check className="icon-xl" />
             </div>
             <p className="saved-title">Saved!</p>
-            <p className="saved-sub">Your transaction has been logged.</p>
+            <p className="saved-sub">{isEdit ? 'Your changes have been saved.' : 'Your transaction has been logged.'}</p>
           </div>
         ) : (
           <>
             <div className="modal-header">
-              <h3 className="modal-title">Add Transaction</h3>
+              <h3 className="modal-title">{isEdit ? 'Edit Transaction' : 'Add Transaction'}</h3>
               <button onClick={onClose} className="modal-close" aria-label="Close">
                 <X className="icon-md" />
               </button>
@@ -152,7 +155,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
 
               <button type="submit" disabled={!isValid || saving} className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '16px' }}>
                 {saving && <Loader2 className="icon-sm spin" />}
-                {saving ? 'Saving…' : 'Save transaction'}
+                {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Save transaction'}
               </button>
             </form>
           </>

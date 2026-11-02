@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
-import { Search, Trash2, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { Search, Trash2, Pencil, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { useStore } from '@/store/StoreContext';
 import { CATEGORIES, getCategory } from '@/lib/categories';
 import { formatKSh, formatDate } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
-export function History() {
+export function History({ onEdit }) {
   const { transactions, deleteTransaction } = useStore();
   const [query, setQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -113,6 +113,9 @@ export function History() {
                     {isIncome ? <ArrowDownLeft className="icon-sm" style={{ color: '#22c55e' }} /> : <ArrowUpRight className="icon-sm" style={{ color: '#ef4444' }} />}
                     {formatKSh(t.amount)}
                   </div>
+                  <button onClick={() => onEdit(t)} className="budget-edit" style={{ opacity: 1 }} aria-label="Edit transaction">
+                    <Pencil className="icon-sm" />
+                  </button>
                   <button onClick={() => handleDelete(t.id)} disabled={deletingId === t.id} className="budget-edit" style={{ opacity: 1 }} aria-label="Delete transaction">
                     <Trash2 className="icon-sm" />
                   </button>

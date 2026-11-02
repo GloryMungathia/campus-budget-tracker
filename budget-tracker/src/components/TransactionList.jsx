@@ -1,9 +1,9 @@
-import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Pencil, Receipt } from 'lucide-react';
 import { getCategory } from '@/lib/categories';
 import { formatKSh, formatDateShort } from '@/lib/format';
 import { CategoryIcon } from './CategoryIcon';
 
-export function TransactionList({ transactions, limit, emptyMessage = 'No transactions yet', onDelete }) {
+export function TransactionList({ transactions, limit, emptyMessage = 'No transactions yet', onDelete, onEdit }) {
   const list = limit ? transactions.slice(0, limit) : transactions;
 
   if (list.length === 0) {
@@ -38,6 +38,11 @@ export function TransactionList({ transactions, limit, emptyMessage = 'No transa
               {isIncome ? <ArrowDownLeft className="icon-sm" style={{ color: '#22c55e' }} /> : <ArrowUpRight className="icon-sm" style={{ color: '#ef4444' }} />}
               {formatKSh(t.amount)}
             </div>
+            {onEdit && (
+              <button onClick={() => onEdit(t)} className="tx-edit" aria-label={`Edit ${cat?.name ?? 'transaction'}`}>
+                <Pencil className="icon-sm" />
+              </button>
+            )}
             {onDelete && (
               <button onClick={() => onDelete(t.id)} className="tx-delete">
                 Delete
