@@ -112,6 +112,12 @@ The application was developed using the following technologies:
 - **Vite** — Used as the development server and production build tool
 - **CSS** — Used for styling and responsive interface design
 - **Lucide React** — Used for interface icons
+- **FastAPI (Python)** — Used to build the backend API
+- **SQLAlchemy** — Used to save data in the database
+- **PostgreSQL** — Used as the database when hosted (SQLite is used locally)
+- **JWT** — Used to keep users logged in
+- **Netlify** — Hosts the frontend
+- **Render** — Hosts the backend and database
 
 ---
 
@@ -133,41 +139,127 @@ This structure makes the application easier to maintain, understand, and extend.
 
 ---
 
+## 🔐 User Accounts
+
+Each student signs up with their name, email and password. After logging in, they only see their own transactions and budgets. Passwords are stored as secure hashes, never as plain text.
+
+- Passwords need at least 8 characters, with a letter and a number
+- "Keep me logged in" keeps a student logged in for 30 days. Without it, they stay logged in until the browser is closed
+- On the Account page, a student can add a profile photo, change their name or password, log out, or delete their account
+
+---
+
 ## 📂 Project Structure
 
 ```text
-budget-tracker/
+campus-budget-tracker/
 │
-├── src/
-│   │
-│   ├── components/
-│   │   ├── AddTransactionModal.jsx
-│   │   ├── CategoryIcon.jsx
-│   │   ├── Charts.jsx
-│   │   ├── Header.jsx
-│   │   ├── Sidebar.jsx
-│   │   └── TransactionList.jsx
-│   │
-│   ├── lib/
-│   │   ├── analytics.js
-│   │   ├── categories.js
-│   │   ├── format.js
-│   │   └── seed.js
-│   │
-│   ├── store/
-│   │   └── StoreContext.jsx
-│   │
-│   ├── views/
-│   │   ├── Budgets.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── History.jsx
-│   │   └── Insights.jsx
-│   │
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
+├── backend/                  FastAPI backend
+│   ├── app/
+│   │   ├── routers/          auth, transactions, budgets
+│   │   ├── categories.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   └── security.py
+│   ├── tests/
+│   └── requirements.txt
 │
-├── index.html
-├── package.json
-├── package-lock.json
-└── vite.config.js
+├── budget-tracker/           React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── lib/              api, analytics, categories, format
+│   │   ├── store/            AuthContext, StoreContext
+│   │   └── views/            AuthScreen, Dashboard, Budgets, History, Insights
+│   ├── tests/
+│   └── package.json
+│
+├── netlify.toml              Netlify settings
+└── render.yaml               Render settings
+```
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | /api/auth/register | Create an account |
+| POST | /api/auth/login | Log in |
+| GET | /api/auth/me | Get the logged in user |
+| PATCH | /api/auth/me | Change the user's name |
+| PUT | /api/auth/me/avatar | Upload a profile photo |
+| DELETE | /api/auth/me/avatar | Remove the profile photo |
+| POST | /api/auth/change-password | Change the password |
+| POST | /api/auth/delete-account | Delete the account and all its data |
+| GET | /api/transactions | List the user's transactions |
+| POST | /api/transactions | Add a transaction |
+| DELETE | /api/transactions/{id} | Delete a transaction |
+| GET | /api/budgets | List the user's budgets |
+| PUT | /api/budgets/{categoryId} | Create or update a budget |
+| DELETE | /api/budgets/{categoryId} | Remove a budget |
+| GET | /api/health | Check the server is running |
+
+When the backend is running, the full API docs are at /docs.
+
+---
+
+## 💻 Running Locally
+
+**Backend**
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+uvicorn app.main:app --reload
+```
+
+The API runs at http://localhost:8000.
+
+**Frontend**
+
+```bash
+cd budget-tracker
+npm install
+npm run dev
+```
+
+The app runs at http://localhost:5173.
+
+---
+
+## 🧪 Testing
+
+```bash
+cd backend
+pytest --cov=app
+
+cd budget-tracker
+npm run test:coverage
+```
+
+Tests also run on GitHub for every push and pull request.
+
+---
+
+## 🚀 Deployment
+
+**Backend and database on Render**
+
+1. On Render, choose New, then Blueprint, and pick this repository. Render reads render.yaml and creates the API and the database.
+2. When asked for FRONTEND_ORIGINS, enter the Netlify link, for example https://campusbudgettracker.netlify.app
+3. After it deploys, copy the API link, for example https://tumatrack-api.onrender.com
+
+**Frontend on Netlify**
+
+1. In the Netlify site settings, add an environment variable VITE_API_URL with the Render API link.
+2. Netlify reads netlify.toml, so the build settings are already set. Trigger a new deploy.
+
+**Notes on the free plans**
+
+- The backend sleeps after 15 minutes without use, so the first request after that can take about a minute.
+- Render's free database is deleted 30 days after it is created. To keep data longer, create a free database on Neon (neon.tech), then in the Render API settings set DATABASE_URL to the Neon connection link.

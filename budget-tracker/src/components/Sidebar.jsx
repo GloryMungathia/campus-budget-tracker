@@ -1,13 +1,17 @@
-import { X, LayoutDashboard, Target, PieChart, History, Wallet } from 'lucide-react';
+import { X, LayoutDashboard, Target, PieChart, History, Wallet, LogOut, UserRound } from 'lucide-react';
+import { useAuth } from '@/store/AuthContext';
+import { Avatar } from './Avatar';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'budgets', label: 'Budgets', icon: Target },
   { id: 'insights', label: 'Insights', icon: PieChart },
   { id: 'history', label: 'History', icon: History },
+  { id: 'account', label: 'Account', icon: UserRound },
 ];
 
 export function Sidebar({ current, onNavigate, open, onClose }) {
+  const { user, logout } = useAuth();
   return (
     <>
       <div
@@ -54,6 +58,20 @@ export function Sidebar({ current, onNavigate, open, onClose }) {
             <p className="sidebar-card-title">Stay on budget</p>
             <p className="sidebar-card-text">Track every shilling. A clear view of your money means smarter spending.</p>
           </div>
+          {user && (
+            <div className="sidebar-user">
+              <button className="sidebar-avatar" onClick={() => onNavigate('account')} aria-label="Open account">
+                <Avatar user={user} size={36} />
+              </button>
+              <div className="sidebar-user-info">
+                <p className="sidebar-user-name">{user.name}</p>
+                <p className="sidebar-user-email">{user.email}</p>
+              </div>
+              <button onClick={logout} className="sidebar-logout" aria-label="Log out" title="Log out">
+                <LogOut className="icon-sm" />
+              </button>
+            </div>
+          )}
           <p className="sidebar-made">Made for Kenyan campus students</p>
         </div>
       </aside>

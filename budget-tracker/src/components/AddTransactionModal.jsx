@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Check, TrendingUp, TrendingDown } from 'lucide-react';
+import { X, Check, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/categories';
 import { useStore } from '@/store/StoreContext';
 import { todayISO } from '@/lib/format';
@@ -13,6 +13,8 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
   const [date, setDate] = useState(todayISO());
   const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
@@ -24,24 +26,41 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
       setDate(todayISO());
       setNote('');
       setSaved(false);
+      setSaving(false);
+      setError('');
     }
   }, [open, defaultType]);
 
   useEffect(() => {
+    if (!saved) return;
+    const timer = setTimeout(onClose, 900);
+    return () => clearTimeout(timer);
+  }, [saved, onClose]);
+
+  function changeType(next) {
+    if (next === type) return;
+    setType(next);
     setCategoryId('');
-  }, [type]);
+  }
 
   if (!open) return null;
 
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ''), 10);
-  const isValid = categoryId && parsedAmount > 0 && date;
+  const isValid = Boolean(categoryId && parsedAmount > 0 && date);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!isValid) return;
-    addTransaction({ type, categoryId, amount: parsedAmount, date, note: note.trim() });
-    setSaved(true);
-    setTimeout(onClose, 900);
+    if (!isValid || saving) return;
+    setSaving(true);
+    setError('');
+    try {
+      await addTransaction({ type, categoryId, amount: parsedAmount, date, note: note.trim() });
+      setSaved(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -68,14 +87,14 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
               <div className="type-toggle">
                 <button
                   type="button"
-                  onClick={() => setType('expense')}
+                  onClick={() => changeType('expense')}
                   className={`type-btn ${type === 'expense' ? 'active expense' : ''}`}
                 >
                   <TrendingDown className="icon-sm" /> Expense
                 </button>
                 <button
                   type="button"
-                  onClick={() => setType('income')}
+                  onClick={() => changeType('income')}
                   className={`type-btn ${type === 'income' ? 'active income' : ''}`}
                 >
                   <TrendingUp className="icon-sm" /> Income
@@ -83,10 +102,11 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
               </div>
 
               <div>
-                <label className="label">Amount (KSh)</label>
+                <label className="label" htmlFor="tx-amount">Amount (KSh)</label>
                 <div className="amount-wrapper">
                   <span className="amount-prefix">KSh</span>
                   <input
+                    id="tx-amount"
                     type="text"
                     inputMode="numeric"
                     value={amount ? parseInt(amount.replace(/[^0-9]/g, ''), 10).toLocaleString('en-KE') : ''}
@@ -107,6 +127,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
                       type="button"
                       onClick={() => setCategoryId(c.id)}
                       className={`category-btn ${categoryId === c.id ? 'selected' : ''}`}
+                      aria-pressed={categoryId === c.id}
                     >
                       <div className="category-icon-box" style={{ backgroundColor: `${c.color}15` }}>
                         <CategoryIcon name={c.icon} className="icon-md" />
@@ -118,17 +139,20 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }) 
               </div>
 
               <div>
-                <label className="label">Date</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
+                <label className="label" htmlFor="tx-date">Date</label>
+                <input id="tx-date" type="date" max={todayISO()} value={date} onChange={(e) => setDate(e.target.value)} className="input" />
               </div>
 
               <div>
-                <label className="label">Note (optional)</label>
-                <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Matatu to town" className="input" maxLength={80} />
+                <label className="label" htmlFor="tx-note">Note (optional)</label>
+                <input id="tx-note" type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Matatu to town" className="input" maxLength={80} />
               </div>
 
-              <button type="submit" disabled={!isValid} className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '16px' }}>
-                Save transaction
+              {error && <p className="form-error" role="alert">{error}</p>}
+
+              <button type="submit" disabled={!isValid || saving} className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '16px' }}>
+                {saving && <Loader2 className="icon-sm spin" />}
+                {saving ? 'Saving…' : 'Save transaction'}
               </button>
             </form>
           </>
