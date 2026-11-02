@@ -10,6 +10,17 @@ export function History() {
   const [query, setQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [deletingId, setDeletingId] = useState(null);
+
+  async function handleDelete(id) {
+    if (!window.confirm('Delete this transaction?')) return;
+    setDeletingId(id);
+    try {
+      await deleteTransaction(id);
+    } catch {
+      setDeletingId(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     return transactions
@@ -20,12 +31,12 @@ export function History() {
         const cat = getCategory(t.categoryId);
         const q = query.toLowerCase();
         return (
-          cat?.name.toLowerCase().includes(q) ||
-          t.note.toLowerCase().includes(q) ||
+          (cat?.name ?? '').toLowerCase().includes(q) ||
+          (t.note ?? '').toLowerCase().includes(q) ||
           String(t.amount).includes(q)
         );
       })
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
   }, [transactions, filterType, filterCategory, query]);
 
   return (
@@ -102,7 +113,7 @@ export function History() {
                     {isIncome ? <ArrowDownLeft className="icon-sm" style={{ color: '#22c55e' }} /> : <ArrowUpRight className="icon-sm" style={{ color: '#ef4444' }} />}
                     {formatKSh(t.amount)}
                   </div>
-                  <button onClick={() => deleteTransaction(t.id)} className="budget-edit" style={{ opacity: 1 }} aria-label="Delete transaction">
+                  <button onClick={() => handleDelete(t.id)} disabled={deletingId === t.id} className="budget-edit" style={{ opacity: 1 }} aria-label="Delete transaction">
                     <Trash2 className="icon-sm" />
                   </button>
                 </li>

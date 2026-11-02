@@ -1,8 +1,12 @@
-import { getCategory } from './categories';
-import { isThisMonth } from './format';
+import { getCategory } from './categories.js';
+import { isThisMonth, parseDate } from './format.js';
 
-export function getMonthlySummary(transactions, budgets) {
-  const thisMonth = transactions.filter((t) => isThisMonth(t.date));
+function thisMonthExpenses(transactions, now) {
+  return transactions.filter((t) => t.type === 'expense' && isThisMonth(t.date, now));
+}
+
+export function getMonthlySummary(transactions, budgets, now = new Date()) {
+  const thisMonth = transactions.filter((t) => isThisMonth(t.date, now));
   const income = thisMonth.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = thisMonth.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const totalBudget = budgets.reduce((s, b) => s + b.limit, 0);
@@ -13,8 +17,8 @@ export function getMonthlySummary(transactions, budgets) {
   return { income, expense, balance: income - expense, totalBudget, totalSpent };
 }
 
-export function getSpendingByCategory(transactions) {
-  const thisMonth = transactions.filter((t) => t.type === 'expense' && isThisMonth(t.date));
+export function getSpendingByCategory(transactions, now = new Date()) {
+  const thisMonth = thisMonthExpenses(transactions, now);
   const total = thisMonth.reduce((s, t) => s + t.amount, 0);
   const byCat = new Map();
   for (const t of thisMonth) {
@@ -35,29 +39,20 @@ export function getSpendingByCategory(transactions) {
     .sort((a, b) => b.amount - a.amount);
 }
 
-export function getWeeklySpending(transactions) {
-  const thisMonth = transactions.filter((t) => t.type === 'expense' && isThisMonth(t.date));
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const weeks = [];
-  for (let w = 0; w < 4; w++) {
-    const weekStart = new Date(startOfMonth);
-    weekStart.setDate(startOfMonth.getDate() + w * 7);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 7);
-    const amount = thisMonth
-      .filter((t) => {
-        const d = new Date(t.date);
-        return d >= weekStart && d < weekEnd;
-      })
-      .reduce((s, t) => s + t.amount, 0);
-    weeks.push({ label: `W${w + 1}`, amount });
+export function getWeeklySpending(transactions, now = new Date()) {
+  const thisMonth = thisMonthExpenses(transactions, now);
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const weekCount = Math.ceil(daysInMonth / 7);
+  const weeks = Array.from({ length: weekCount }, (_, w) => ({ label: `W${w + 1}`, amount: 0 }));
+  for (const t of thisMonth) {
+    const w = Math.floor((parseDate(t.date).getDate() - 1) / 7);
+    weeks[w].amount += t.amount;
   }
   return weeks;
 }
 
-export function getBudgetProgress(transactions, budgets) {
-  const thisMonth = transactions.filter((t) => t.type === 'expense' && isThisMonth(t.date));
+export function getBudgetProgress(transactions, budgets, now = new Date()) {
+  const thisMonth = thisMonthExpenses(transactions, now);
   return budgets
     .map((b) => {
       const cat = getCategory(b.categoryId);
@@ -81,8 +76,8 @@ export function getBudgetProgress(transactions, budgets) {
     .sort((a, b) => b.percentage - a.percentage);
 }
 
-export function getTopInsight(transactions) {
-  const spending = getSpendingByCategory(transactions);
+export function getTopInsight(transactions, now = new Date()) {
+  const spending = getSpendingByCategory(transactions, now);
   if (spending.length === 0) return null;
   const top = spending[0];
   return `You spent the most on ${top.name} — ${Math.round(top.percentage)}% of your expenses this month.`;

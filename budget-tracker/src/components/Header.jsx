@@ -5,6 +5,7 @@ const TITLES = {
   budgets: { title: 'Budgets', subtitle: 'Set limits and track spending per category' },
   insights: { title: 'Insights', subtitle: 'See where your money goes' },
   history: { title: 'History', subtitle: 'Every transaction you have logged' },
+  account: { title: 'Account', subtitle: 'Your details and password' },
 };
 
 export function Header({ view, onMenuClick, onAddClick }) {

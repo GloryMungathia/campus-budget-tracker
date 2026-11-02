@@ -34,10 +34,10 @@ export function Dashboard({ onNavigate, onAddClick }) {
           </div>
           <p className="balance-amount">{formatKSh(summary.balance)}</p>
           <div className="balance-actions">
-            <button onClick={onAddClick} className="btn-white">
+            <button onClick={() => onAddClick('expense')} className="btn-white">
               <TrendingDown className="icon-sm" /> Add Expense
             </button>
-            <button onClick={onAddClick} className="btn-glass">
+            <button onClick={() => onAddClick('income')} className="btn-glass">
               <TrendingUp className="icon-sm" /> Add Income
             </button>
           </div>
@@ -98,9 +98,11 @@ export function Dashboard({ onNavigate, onAddClick }) {
               </div>
             </div>
             <p style={{ fontSize: 12, color: '#94a3b8' }}>
-              {summary.totalBudget - summary.totalSpent > 0
-                ? `${formatKSh(summary.totalBudget - summary.totalSpent)} left across all budgets`
-                : `Over budget by ${formatKSh(summary.totalSpent - summary.totalBudget)}`}
+              {summary.totalBudget === 0
+                ? 'No budgets set yet. Add one on the Budgets page.'
+                : summary.totalSpent > summary.totalBudget
+                  ? `Over budget by ${formatKSh(summary.totalSpent - summary.totalBudget)}`
+                  : `${formatKSh(summary.totalBudget - summary.totalSpent)} left across all budgets`}
             </p>
           </div>
         </div>
