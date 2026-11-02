@@ -253,7 +253,7 @@ body {
 
 /* ============ Bar Chart ============ */
 .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; height: 160px; }
-.bar-col { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 8px; }
+.bar-col { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 8px; height: 100%; }
 .bar-wrapper { position: relative; display: flex; width: 100%; flex: 1; align-items: flex-end; justify-content: center; }
 .bar { position: relative; width: 100%; max-width: 48px; border-radius: 8px 8px 0 0; background: linear-gradient(to top, #059669, #2dd4bf); transition: all 0.7s; }
 .bar:hover { background: linear-gradient(to top, #047857, #14b8a6); }
@@ -457,3 +457,6 @@ button.sidebar-avatar { padding: 0; width: 36px; height: 36px; overflow: hidden;
 .photo-links button { background: none; border: none; padding: 0; font: inherit; font-size: 12px; font-weight: 600; color: #059669; cursor: pointer; }
 .photo-links button.danger { color: #dc2626; }
 .photo-links button:hover { text-decoration: underline; }
+
+.tx-edit { border-radius: 8px; padding: 6px; color: #94a3b8; background: none; border: none; cursor: pointer; display: inline-flex; transition: all 0.2s; }
+.tx-edit:hover { background: #ecfdf5; color: #047857; }

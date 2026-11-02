@@ -77,3 +77,45 @@ def test_users_only_see_their_own(client, auth_headers, other_headers):
     assert client.get("/api/transactions", headers=other_headers).json() == []
     assert client.delete(f"/api/transactions/{tx_id}", headers=other_headers).status_code == 404
     assert len(client.get("/api/transactions", headers=auth_headers).json()) == 1
+
+
+def test_edit_transaction(client, auth_headers):
+    created = client.post("/api/transactions", json=make_tx(), headers=auth_headers).json()
+    res = client.put(
+        f"/api/transactions/{created['id']}",
+        json=make_tx(amount=300, categoryId="transport", date="2026-11-01", note=" Matatu "),
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["id"] == created["id"]
+    assert body["amount"] == 300
+    assert body["categoryId"] == "transport"
+    assert body["date"] == "2026-11-01"
+    assert body["note"] == "Matatu"
+    assert body["createdAt"] == created["createdAt"]
+    listed = client.get("/api/transactions", headers=auth_headers).json()
+    assert len(listed) == 1
+    assert listed[0]["amount"] == 300
+
+
+def test_edit_can_switch_type(client, auth_headers):
+    tx_id = client.post("/api/transactions", json=make_tx(), headers=auth_headers).json()["id"]
+    res = client.put(f"/api/transactions/{tx_id}", json=make_tx(type="income", categoryId="helb"), headers=auth_headers)
+    assert res.status_code == 200
+    assert res.json()["type"] == "income"
+
+
+def test_edit_rejects_invalid_data(client, auth_headers):
+    tx_id = client.post("/api/transactions", json=make_tx(), headers=auth_headers).json()["id"]
+    assert client.put(f"/api/transactions/{tx_id}", json=make_tx(amount=0), headers=auth_headers).status_code == 422
+    assert client.put(f"/api/transactions/{tx_id}", json=make_tx(categoryId="helb"), headers=auth_headers).status_code == 422
+    assert client.get("/api/transactions", headers=auth_headers).json()[0]["amount"] == 250
+
+
+def test_edit_missing_or_other_users_transaction(client, auth_headers, other_headers):
+    tx_id = client.post("/api/transactions", json=make_tx(), headers=auth_headers).json()["id"]
+    assert client.put("/api/transactions/9999", json=make_tx(), headers=auth_headers).status_code == 404
+    assert client.put(f"/api/transactions/{tx_id}", json=make_tx(amount=1), headers=other_headers).status_code == 404
+    assert client.put(f"/api/transactions/{tx_id}", json=make_tx()).status_code == 401
+    assert client.get("/api/transactions", headers=auth_headers).json()[0]["amount"] == 250

@@ -196,6 +196,7 @@ campus-budget-tracker/
 | POST | /api/auth/delete-account | Delete the account and all its data |
 | GET | /api/transactions | List the user's transactions |
 | POST | /api/transactions | Add a transaction |
+| PUT | /api/transactions/{id} | Edit a transaction |
 | DELETE | /api/transactions/{id} | Delete a transaction |
 | GET | /api/budgets | List the user's budgets |
 | PUT | /api/budgets/{categoryId} | Create or update a budget |
@@ -250,9 +251,10 @@ Tests also run on GitHub for every push and pull request.
 
 **Backend and database on Render**
 
-1. On Render, choose New, then Blueprint, and pick this repository. Render reads render.yaml and creates the API and the database.
-2. When asked for FRONTEND_ORIGINS, enter the Netlify link, for example https://campusbudgettracker.netlify.app
-3. After it deploys, copy the API link, for example https://tumatrack-api.onrender.com
+1. Create a free database on Neon (neon.tech) in the AWS US West 2 (Oregon) region and copy its pooled connection link.
+2. On Render, choose New, then Blueprint, and pick this repository. Render reads render.yaml and creates the API. Set DATABASE_URL to the Neon link.
+3. When asked for FRONTEND_ORIGINS, enter the Netlify link, for example https://campusbudgettracker.netlify.app
+4. After it deploys, copy the API link, for example https://tumatrack-api.onrender.com
 
 **Frontend on Netlify**
 
@@ -262,4 +264,4 @@ Tests also run on GitHub for every push and pull request.
 **Notes on the free plans**
 
 - The backend sleeps after 15 minutes without use, so the first request after that can take about a minute.
-- Render's free database is deleted 30 days after it is created. To keep data longer, create a free database on Neon (neon.tech), then in the Render API settings set DATABASE_URL to the Neon connection link.
+- The database is on Neon's free plan, which does not expire.

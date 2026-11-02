@@ -36,6 +36,23 @@ def create_transaction(data: TransactionIn, user: User = Depends(get_current_use
     return tx
 
 
+@router.put("/{tx_id}", response_model=TransactionOut)
+def update_transaction(
+    tx_id: int, data: TransactionIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    tx = db.get(Transaction, tx_id)
+    if tx is None or tx.user_id != user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    tx.type = data.type
+    tx.category_id = data.category_id
+    tx.amount = data.amount
+    tx.date = data.date
+    tx.note = data.note
+    db.commit()
+    db.refresh(tx)
+    return tx
+
+
 @router.delete("/{tx_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(tx_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     tx = db.get(Transaction, tx_id)

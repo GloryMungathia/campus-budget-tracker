@@ -99,6 +99,7 @@ export const api = {
   deleteAccount: (password) => request('/api/auth/delete-account', { method: 'POST', body: { password } }),
   listTransactions: () => request('/api/transactions'),
   createTransaction: (t) => request('/api/transactions', { method: 'POST', body: t }),
+  updateTransaction: (id, t) => request(`/api/transactions/${id}`, { method: 'PUT', body: t }),
   deleteTransaction: (id) => request(`/api/transactions/${id}`, { method: 'DELETE' }),
   listBudgets: () => request('/api/budgets'),
   setBudget: (categoryId, limit) => request(`/api/budgets/${categoryId}`, { method: 'PUT', body: { limit } }),

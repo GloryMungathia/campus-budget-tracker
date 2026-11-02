@@ -15,7 +15,7 @@ function StatCard({ label, value, icon, tone }) {
   );
 }
 
-export function Dashboard({ onNavigate, onAddClick }) {
+export function Dashboard({ onNavigate, onAddClick, onEdit }) {
   const { transactions, budgets } = useStore();
   const summary = getMonthlySummary(transactions, budgets);
   const weekly = getWeeklySpending(transactions);
@@ -115,7 +115,7 @@ export function Dashboard({ onNavigate, onAddClick }) {
             View all <ArrowRight className="icon-sm" />
           </button>
         </div>
-        <TransactionList transactions={transactions} limit={6} emptyMessage="No transactions yet — add your first one!" />
+        <TransactionList transactions={transactions} limit={6} onEdit={onEdit} emptyMessage="No transactions yet — add your first one!" />
       </div>
     </div>
   );

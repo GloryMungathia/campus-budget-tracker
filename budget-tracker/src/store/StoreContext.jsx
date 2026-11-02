@@ -51,6 +51,18 @@ export function StoreProvider({ children }) {
     }
   };
 
+  const updateTransaction = async (id, t) => {
+    try {
+      const saved = await api.updateTransaction(id, t);
+      setTransactions((prev) =>
+        prev.map((x) => (x.id === id ? saved : x)).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+      );
+      return saved;
+    } catch (err) {
+      return handleError(err);
+    }
+  };
+
   const deleteTransaction = async (id) => {
     try {
       await api.deleteTransaction(id);
@@ -93,6 +105,7 @@ export function StoreProvider({ children }) {
         clearError: () => setError(''),
         reload: load,
         addTransaction,
+        updateTransaction,
         deleteTransaction,
         setBudget,
         removeBudget,
