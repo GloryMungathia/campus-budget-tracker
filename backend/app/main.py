@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="TumaTrack API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Bob Check API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -25,7 +25,7 @@ export function Sidebar({ current, onNavigate, open, onClose }) {
               <Wallet className="icon-lg" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h1 className="brand-title">TumaTrack</h1>
+              <h1 className="brand-title">Bob Check</h1>
               <p className="brand-sub">Campus Budget Tracker</p>
             </div>
           </div>
