@@ -68,6 +68,11 @@ class UserOut(CamelModel):
     name: str
     email: str
     avatar: str | None = None
+    next_money_date: date | None = None
+
+
+class NextMoneyIn(CamelModel):
+    next_money_date: date | None = None
 
 
 AVATAR_PATTERN = re.compile(r"^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$")

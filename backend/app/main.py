@@ -9,11 +9,15 @@ from app.database import Base, engine
 from app.routers import auth, budgets, transactions
 
 
+NEW_USER_COLUMNS = {"avatar": "TEXT", "next_money_date": "DATE"}
+
+
 def add_missing_columns(bind) -> None:
     columns = {c["name"] for c in inspect(bind).get_columns("users")}
-    if "avatar" not in columns:
-        with bind.begin() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN avatar TEXT"))
+    for name, kind in NEW_USER_COLUMNS.items():
+        if name not in columns:
+            with bind.begin() as conn:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {name} {kind}"))
 
 
 @asynccontextmanager

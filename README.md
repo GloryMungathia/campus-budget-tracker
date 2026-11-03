@@ -139,11 +139,23 @@ This structure makes the application easier to maintain, understand, and extend.
 
 ---
 
+## ⏳ Make Your Money Last
+
+Student money does not arrive every month. It comes when HELB is paid, when pocket money is sent or when a side hustle pays. TumaTrack works around that.
+
+- The student says when their next money arrives
+- The dashboard shows how much they can safely spend per day until then, and how much is left for today
+- After a few days of logging, it shows whether their money will last at their current pace, or the date it will run out
+- When adding an expense, the app shows what it costs in days of money, for example "This costs about 3 days of your money"
+
+---
+
 ## 🔐 User Accounts
 
 Each student signs up with their name, email and password. After logging in, they only see their own transactions and budgets. Passwords are stored as secure hashes, never as plain text.
 
 - Passwords need at least 8 characters, with a letter and a number
+- After 5 wrong passwords, logging in to that account is paused for 3 minutes
 - "Keep me logged in" keeps a student logged in for 30 days. Without it, they stay logged in until the browser is closed
 - On the Account page, a student can add a profile photo, change their name or password, log out, or delete their account
 
@@ -190,6 +202,7 @@ campus-budget-tracker/
 | POST | /api/auth/login | Log in |
 | GET | /api/auth/me | Get the logged in user |
 | PATCH | /api/auth/me | Change the user's name |
+| PUT | /api/auth/me/next-money | Save when the next money arrives |
 | PUT | /api/auth/me/avatar | Upload a profile photo |
 | DELETE | /api/auth/me/avatar | Remove the profile photo |
 | POST | /api/auth/change-password | Change the password |

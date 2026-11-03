@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { X, Check, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/categories';
 import { useStore } from '@/store/StoreContext';
-import { todayISO } from '@/lib/format';
+import { todayISO, formatKSh } from '@/lib/format';
+import { getRunway, costInDays } from '@/lib/runway';
+import { useAuth } from '@/store/AuthContext';
 import { CategoryIcon } from './CategoryIcon';
 
 export function AddTransactionModal({ open, onClose, defaultType = 'expense', editing = null }) {
-  const { addTransaction, updateTransaction } = useStore();
+  const { transactions, addTransaction, updateTransaction } = useStore();
+  const { user, setNextMoneyDate } = useAuth();
   const isEdit = Boolean(editing);
   const [type, setType] = useState(defaultType);
   const [categoryId, setCategoryId] = useState('');
@@ -16,6 +19,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [nextMoney, setNextMoney] = useState('');
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
@@ -29,6 +33,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
       setSaved(false);
       setSaving(false);
       setError('');
+      setNextMoney(user?.nextMoneyDate ?? '');
     }
   }, [open, defaultType, editing]);
 
@@ -48,6 +53,10 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
 
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ''), 10);
   const isValid = Boolean(categoryId && parsedAmount > 0 && date);
+  const otherTransactions = isEdit ? transactions.filter((t) => t.id !== editing.id) : transactions;
+  const runway = getRunway(otherTransactions, user?.nextMoneyDate ?? null);
+  const days = type === 'expense' ? costInDays(parsedAmount, runway.perDay) : null;
+  const tooMuch = type === 'expense' && parsedAmount > 0 && parsedAmount > runway.left;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -58,6 +67,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
       const data = { type, categoryId, amount: parsedAmount, date, note: note.trim() };
       if (isEdit) await updateTransaction(editing.id, data);
       else await addTransaction(data);
+      if (type === 'income' && nextMoney && nextMoney !== (user?.nextMoneyDate ?? '')) await setNextMoneyDate(nextMoney);
       setSaved(true);
     } catch (err) {
       setError(err.message);
@@ -119,6 +129,13 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
                     autoFocus
                   />
                 </div>
+                {tooMuch ? (
+                  <p className="cost-days danger" data-testid="cost-days">This is more than the {formatKSh(runway.left)} you have left.</p>
+                ) : days !== null ? (
+                  <p className={`cost-days ${days >= 1 ? 'warn' : ''}`} data-testid="cost-days">
+                    This costs about {days} {days === 1 ? 'day' : 'days'} of your money ({formatKSh(runway.perDay)} a day).
+                  </p>
+                ) : null}
               </div>
 
               <div>
@@ -145,6 +162,13 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense', ed
                 <label className="label" htmlFor="tx-date">Date</label>
                 <input id="tx-date" type="date" max={todayISO()} value={date} onChange={(e) => setDate(e.target.value)} className="input" />
               </div>
+
+              {type === 'income' && (
+                <div>
+                  <label className="label" htmlFor="tx-next-money">When does your next money arrive? (optional)</label>
+                  <input id="tx-next-money" type="date" min={todayISO()} value={nextMoney} onChange={(e) => setNextMoney(e.target.value)} className="input" />
+                </div>
+              )}
 
               <div>
                 <label className="label" htmlFor="tx-note">Note (optional)</label>

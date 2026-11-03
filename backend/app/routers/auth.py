@@ -4,7 +4,18 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.schemas import AuthOut, AvatarIn, ChangePasswordIn, DeleteAccountIn, LoginIn, RegisterIn, UpdateMeIn, UserOut
+from app.ratelimit import login_limiter, wait_message
+from app.schemas import (
+    AuthOut,
+    AvatarIn,
+    ChangePasswordIn,
+    DeleteAccountIn,
+    LoginIn,
+    NextMoneyIn,
+    RegisterIn,
+    UpdateMeIn,
+    UserOut,
+)
 from app.security import create_access_token, get_current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -27,9 +38,18 @@ def register(data: RegisterIn, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=AuthOut)
 def login(data: LoginIn, db: Session = Depends(get_db)):
+    wait = login_limiter.seconds_left(data.email)
+    if wait:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=wait_message(wait),
+            headers={"Retry-After": str(wait)},
+        )
     user = db.scalar(select(User).where(User.email == data.email))
     if user is None or not verify_password(data.password, user.password_hash):
+        login_limiter.record_failure(data.email)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong email or password")
+    login_limiter.reset(data.email)
     return auth_response(user, data.remember)
 
 
@@ -41,6 +61,14 @@ def me(user: User = Depends(get_current_user)):
 @router.patch("/me", response_model=UserOut)
 def update_me(data: UpdateMeIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     user.name = data.name
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.put("/me/next-money", response_model=UserOut)
+def set_next_money(data: NextMoneyIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user.next_money_date = data.next_money_date
     db.commit()
     db.refresh(user)
     return user
