@@ -4,6 +4,8 @@ import { getMonthlySummary, getWeeklySpending, getTopInsight } from '@/lib/analy
 import { formatKSh, formatKShShort } from '@/lib/format';
 import { BarChart } from '@/components/Charts';
 import { TransactionList } from '@/components/TransactionList';
+import { RunwayCard } from '@/components/RunwayCard';
+import { moneyLeft } from '@/lib/runway';
 
 function StatCard({ label, value, icon, tone }) {
   return (
@@ -20,6 +22,7 @@ export function Dashboard({ onNavigate, onAddClick, onEdit }) {
   const summary = getMonthlySummary(transactions, budgets);
   const weekly = getWeeklySpending(transactions);
   const insight = getTopInsight(transactions);
+  const balance = moneyLeft(transactions);
   const budgetPct = summary.totalBudget > 0 ? Math.round((summary.totalSpent / summary.totalBudget) * 100) : 0;
 
   return (
@@ -30,9 +33,9 @@ export function Dashboard({ onNavigate, onAddClick, onEdit }) {
         <div style={{ position: 'relative' }}>
           <div className="balance-label">
             <Wallet className="icon-md" style={{ color: '#a7f3d0' }} />
-            <p>Current balance this month</p>
+            <p>Money you have left</p>
           </div>
-          <p className="balance-amount">{formatKSh(summary.balance)}</p>
+          <p className="balance-amount">{formatKSh(balance)}</p>
           <div className="balance-actions">
             <button onClick={() => onAddClick('expense')} className="btn-white">
               <TrendingDown className="icon-sm" /> Add Expense
@@ -44,9 +47,11 @@ export function Dashboard({ onNavigate, onAddClick, onEdit }) {
         </div>
       </div>
 
+      <RunwayCard />
+
       <div className="stat-grid">
-        <StatCard label="Money In" value={formatKSh(summary.income)} icon={<TrendingUp className="icon-md" />} tone="success" />
-        <StatCard label="Money Out" value={formatKSh(summary.expense)} icon={<TrendingDown className="icon-md" />} tone="danger" />
+        <StatCard label="Money in this month" value={formatKSh(summary.income)} icon={<TrendingUp className="icon-md" />} tone="success" />
+        <StatCard label="Money out this month" value={formatKSh(summary.expense)} icon={<TrendingDown className="icon-md" />} tone="danger" />
         <StatCard label="Budget Used" value={`${budgetPct}%`} icon={<Target className="icon-md" />} tone="primary" />
         <StatCard label="Total Budget" value={formatKShShort(summary.totalBudget)} icon={<Wallet className="icon-md" />} tone="neutral" />
       </div>

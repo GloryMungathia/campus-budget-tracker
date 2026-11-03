@@ -166,6 +166,7 @@ test('all api helpers hit the right paths', async () => {
   await api.updateMe('B');
   await api.changePassword('old12345', 'new12345');
   await api.deleteAccount('old12345');
+  await api.setNextMoneyDate('2026-11-25');
   await api.updateTransaction(7, { amount: 5 });
   await api.setAvatar('data:image/jpeg;base64,AAAA');
   await api.removeAvatar();
@@ -180,6 +181,7 @@ test('all api helpers hit the right paths', async () => {
       'PATCH /api/auth/me',
       'POST /api/auth/change-password',
       'POST /api/auth/delete-account',
+      'PUT /api/auth/me/next-money',
       'PUT /api/transactions/7',
       'PUT /api/auth/me/avatar',
       'DELETE /api/auth/me/avatar',

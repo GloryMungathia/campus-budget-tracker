@@ -92,6 +92,7 @@ export const api = {
     request('/api/auth/login', { method: 'POST', body: { email, password, remember } }),
   me: () => request('/api/auth/me'),
   updateMe: (name) => request('/api/auth/me', { method: 'PATCH', body: { name } }),
+  setNextMoneyDate: (nextMoneyDate) => request('/api/auth/me/next-money', { method: 'PUT', body: { nextMoneyDate } }),
   setAvatar: (image) => request('/api/auth/me/avatar', { method: 'PUT', body: { image } }),
   removeAvatar: () => request('/api/auth/me/avatar', { method: 'DELETE' }),
   changePassword: (currentPassword, newPassword) =>

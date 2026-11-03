@@ -48,6 +48,10 @@ export function AuthProvider({ children }) {
     setUser(updated);
   }, []);
 
+  const setNextMoneyDate = useCallback(async (date) => {
+    setUser(await api.setNextMoneyDate(date));
+  }, []);
+
   const setAvatar = useCallback(async (image) => {
     setUser(await api.setAvatar(image));
   }, []);
@@ -68,7 +72,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, checking, login, register, logout, updateName, setAvatar, removeAvatar, changePassword, deleteAccount }}>
+    <AuthContext.Provider value={{ user, checking, login, register, logout, updateName, setNextMoneyDate, setAvatar, removeAvatar, changePassword, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
