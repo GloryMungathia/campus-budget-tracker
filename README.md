@@ -258,6 +258,32 @@ cd budget-tracker
 npm run test:coverage
 ```
 
+### Browser tests (Playwright)
+
+The browser tests use the app the way a student would: sign up, set the next money date, add and edit transactions, and check the login limit and phone layout.
+
+Install the browser once:
+
+```bash
+cd budget-tracker
+npm install
+npx playwright install chromium
+```
+
+Run the tests on your computer. They start their own backend and website with a fresh test database:
+
+```bash
+npm run test:e2e
+```
+
+Run them against the live site:
+
+```bash
+E2E_BASE_URL=https://campusbudgettracker.netlify.app npm run test:e2e
+```
+
+Open the last report with `npm run test:e2e:report`.
+
 Tests also run on GitHub for every push and pull request.
 
 ---
