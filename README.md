@@ -1,10 +1,12 @@
-# Campus Budget Tracker
+# Bob Check
 
-A web-based personal finance management application designed to help students track their income and expenses, manage budgets, review transaction history, and gain a better understanding of their spending habits.
+Bob Check is a budget app for Kenyan campus students. "Bob" is what students call a shilling, so Bob Check simply means checking your money.
+
+It is a web-based personal finance management application designed to help students track their income and expenses, manage budgets, review transaction history, and gain a better understanding of their spending habits.
 
 ## 🌐 Live Demo
 
-**[View Campus Budget Tracker](https://campusbudgettracker.netlify.app/)**
+**[View Bob Check](https://campusbudgettracker.netlify.app/)**
 
 ---
 
@@ -12,7 +14,7 @@ A web-based personal finance management application designed to help students tr
 
 Managing personal finances can be challenging for students, especially when dealing with limited or irregular sources of income.
 
-Campus Budget Tracker provides a simple and organized way for students to keep track of their financial activities. The application brings transactions, budgets, spending information, and financial insights together in one interface.
+Bob Check provides a simple and organized way for students to keep track of their financial activities. The application brings transactions, budgets, spending information, and financial insights together in one interface.
 
 The goal of the application is to make personal financial management easier and help students become more aware of where their money goes.
 
@@ -24,13 +26,13 @@ Students often need to manage expenses such as food, transport, accommodation, e
 
 Without a simple way to record and review these expenses, it can become difficult to understand spending patterns and determine whether money is being used according to planned budgets.
 
-Campus Budget Tracker addresses this problem by providing a centralized interface where students can record transactions, organize their expenses, manage budgets, and review their financial activity.
+Bob Check addresses this problem by providing a centralized interface where students can record transactions, organize their expenses, manage budgets, and review their financial activity.
 
 ---
 
 ## 💡 Project Goal
 
-The goal of Campus Budget Tracker is to provide students with an easy-to-use financial management tool that helps them:
+The goal of Bob Check is to provide students with an easy-to-use financial management tool that helps them:
 
 - Track their income and expenses
 - Organize transactions into categories
@@ -123,7 +125,7 @@ The application was developed using the following technologies:
 
 ## 🏗️ Application Architecture
 
-Campus Budget Tracker follows a component-based React structure.
+Bob Check follows a component-based React structure.
 
 The application is organized into reusable components, views, utility modules, and state management logic.
 
@@ -141,7 +143,7 @@ This structure makes the application easier to maintain, understand, and extend.
 
 ## ⏳ Make Your Money Last
 
-Student money does not arrive every month. It comes when HELB is paid, when pocket money is sent or when a side hustle pays. TumaTrack works around that.
+Student money does not arrive every month. It comes when HELB is paid, when pocket money is sent or when a side hustle pays. Bob Check works around that.
 
 - The student says when their next money arrives
 - The dashboard shows how much they can safely spend per day until then, and how much is left for today
